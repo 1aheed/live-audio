@@ -221,7 +221,7 @@ export class GdmLiveAudio extends LitElement {
             this.updateError(e.message);
           },
           onclose: (e: CloseEvent) => {
-            this.updateError('Close:' + e.reason);
+            this.updateError('' + e.reason);
           },
         },
         config: {
