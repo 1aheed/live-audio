@@ -150,7 +150,7 @@ export class GdmLiveAudio extends LitElement {
   }
 
   private async initSession() {
-    const model = 'gemini-2.5-flash-preview-native-audio-dialog';
+    const model = 'gemini-2.5-flash-preview';
     
     // Validate environment variables
     const systemInstruction = process.env.SYSTEM_INSTRUCTION;
