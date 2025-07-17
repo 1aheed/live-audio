@@ -77,7 +77,8 @@ export class GdmLiveAudioVisuals3D extends LitElement {
 
   private init() {
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x100c14);
+    // Darker background for electric blue contrast
+    scene.background = new THREE.Color(0x0a0a0f);
 
     const backdrop = new THREE.Mesh(
       new THREE.IcosahedronGeometry(10, 5),
@@ -123,12 +124,13 @@ export class GdmLiveAudioVisuals3D extends LitElement {
     const pmremGenerator = new THREE.PMREMGenerator(renderer);
     pmremGenerator.compileEquirectangularShader();
 
+    // Electric blue sphere material with enhanced glow
     const sphereMaterial = new THREE.MeshStandardMaterial({
-      color: 0x000010,
-      metalness: 0.5,
-      roughness: 0.1,
-      emissive: 0x000010,
-      emissiveIntensity: 1.5,
+      color: 0x00d4ff,           // Bright electric blue
+      metalness: 0.9,            // Very metallic for reflections
+      roughness: 0.05,           // Very smooth for mirror-like effect
+      emissive: 0x0088cc,        // Electric blue glow
+      emissiveIntensity: 2.5,    // Stronger glow intensity
     });
 
     sphereMaterial.onBeforeCompile = (shader) => {
@@ -149,11 +151,12 @@ export class GdmLiveAudioVisuals3D extends LitElement {
 
     const renderPass = new RenderPass(scene, camera);
 
+    // Enhanced bloom for electric blue glow
     const bloomPass = new UnrealBloomPass(
       new THREE.Vector2(window.innerWidth, window.innerHeight),
-      5,
-      0.5,
-      0,
+      8,      // Stronger bloom strength
+      0.8,    // Larger bloom radius
+      0.1,    // Lower threshold for more glow
     );
 
     const fxaaPass = new ShaderPass(FXAAShader);
