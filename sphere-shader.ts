@@ -2,7 +2,7 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
 */
-const vs = #define STANDARD
+const vs = `#define STANDARD
 varying vec3 vViewPosition;
 #ifdef USE_TRANSMISSION
   varying vec3 vWorldPosition;
@@ -19,10 +19,14 @@ varying vec3 vViewPosition;
 #include <shadowmap_pars_vertex>
 #include <logdepthbuf_pars_vertex>
 #include <clipping_planes_pars_vertex>
+
 uniform float time;
+
 uniform vec4 inputData;
 uniform vec4 outputData;
+
 vec3 calc( vec3 pos ) {
+
   vec3 dir = normalize( pos );
   vec3 p = dir + vec3( time, 0., 0. );
   return pos +
@@ -30,6 +34,7 @@ vec3 calc( vec3 pos ) {
     1. * outputData.x * outputData.y * dir * (.5 + .5 * sin(outputData.z * pos.y + time))
   ;
 }
+
 vec3 spherical( float r, float theta, float phi ) {
   return r * vec3(
     cos( theta ) * cos( phi ),
@@ -37,6 +42,7 @@ vec3 spherical( float r, float theta, float phi ) {
     sin( phi )
   );
 }
+
 void main() {
   #include <uv_vertex>
   #include <color_vertex>
@@ -50,16 +56,23 @@ void main() {
   #include <defaultnormal_vertex>
   #include <normal_vertex>
   #include <begin_vertex>
+
   float inc = 0.001;
+
   float r = length( position );
   float theta = ( uv.x + 0.5 ) * 2. * PI;
   float phi = -( uv.y + 0.5 ) * PI;
+
   vec3 np = calc( spherical( r, theta, phi )  );
+
   vec3 tangent = normalize( calc( spherical( r, theta + inc, phi ) ) - np );
   vec3 bitangent = normalize( calc( spherical( r, theta, phi + inc ) ) - np );
   transformedNormal = -normalMatrix * normalize( cross( tangent, bitangent ) );
+
   vNormal = normalize( transformedNormal );
+
   transformed = np;
+
   #include <morphtarget_vertex>
   #include <skinning_vertex>
   #include <displacementmap_vertex>
@@ -73,5 +86,6 @@ void main() {
   #ifdef USE_TRANSMISSION
     vWorldPosition = worldPosition.xyz;
   #endif
-};
+}`;
+
 export {vs};
