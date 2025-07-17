@@ -16,6 +16,8 @@ export class GdmLiveAudio extends LitElement {
   @state() isCameraOn = false;
   @state() status = '';
   @state() error = '';
+  @state() private callDuration = 0;
+  private callTimerInterval: number | null = null;
 
   private client: GoogleGenAI;
   private session: Session;
@@ -170,7 +172,7 @@ export class GdmLiveAudio extends LitElement {
         model: model,
         callbacks: {
           onopen: () => {
-            this.updateStatus('Opened');
+    
           },
           onmessage: async (message: LiveServerMessage) => {
             const audio =
@@ -219,7 +221,7 @@ export class GdmLiveAudio extends LitElement {
             this.updateError(e.message);
           },
           onclose: (e: CloseEvent) => {
-            this.updateStatus('Close:' + e.reason);
+            this.updateError('Close:' + e.reason);
           },
         },
         config: {
@@ -260,7 +262,7 @@ export class GdmLiveAudio extends LitElement {
   }
 
   private async startCamera() {
-    this.updateStatus('Requesting camera access...');
+
     try {
       this.videoStream = await navigator.mediaDevices.getUserMedia({
         video: true,
@@ -268,7 +270,6 @@ export class GdmLiveAudio extends LitElement {
       this.videoPreviewElement.srcObject = this.videoStream;
       await this.videoPreviewElement.play();
       this.isCameraOn = true;
-      this.updateStatus('Camera is on.');
 
       this.videoFrameSender = window.setInterval(() => {
         this.sendVideoFrame();
@@ -281,7 +282,7 @@ export class GdmLiveAudio extends LitElement {
   }
 
   private stopCamera() {
-    this.updateStatus('Stopping camera...');
+
     if (this.videoFrameSender) {
       clearInterval(this.videoFrameSender);
       this.videoFrameSender = null;
@@ -352,6 +353,14 @@ export class GdmLiveAudio extends LitElement {
     );
   }
 
+  private formatDuration(seconds: number): string {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    const paddedMinutes = String(minutes).padStart(2, '0');
+    const paddedSeconds = String(remainingSeconds).padStart(2, '0');
+    return `${paddedMinutes}:${paddedSeconds}`;
+  }
+
   private async startRecording() {
     if (this.isRecording) {
       return;
@@ -399,7 +408,13 @@ export class GdmLiveAudio extends LitElement {
       this.scriptProcessorNode.connect(this.inputAudioContext.destination);
 
       this.isRecording = true;
-      this.updateStatus('🔴 Recording... Capturing PCM chunks.');
+    this.callDuration = 0;
+    this.status = this.formatDuration(this.callDuration);
+    this.callTimerInterval = window.setInterval(() => {
+      this.callDuration++;
+      this.status = this.formatDuration(this.callDuration);
+    }, 1000);
+
     } catch (err) {
       console.error('Error starting recording:', err);
       this.updateStatus(`Error: ${(err as Error).message}`);
@@ -408,6 +423,11 @@ export class GdmLiveAudio extends LitElement {
   }
 
   private stopRecording() {
+    if (this.callTimerInterval) {
+      clearInterval(this.callTimerInterval);
+      this.callTimerInterval = null;
+    }
+    this.status = '';
     if (!this.isRecording && !this.mediaStream && !this.inputAudioContext)
       return;
 
@@ -675,7 +695,11 @@ export class GdmLiveAudio extends LitElement {
     this.session?.close();
     this.stopCamera();
     this.initSession();
-    this.updateStatus('Session cleared.');
+
+    if (this.callTimerInterval) {
+      clearInterval(this.callTimerInterval);
+      this.callTimerInterval = null;
+    }
   }
 
   render() {
@@ -756,6 +780,7 @@ export class GdmLiveAudio extends LitElement {
             </svg>
           </button>
         </div>
+
 
         <div id="status"> ${this.error || this.status} </div>
         <gdm-live-audio-visuals-3d
