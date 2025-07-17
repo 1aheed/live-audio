@@ -453,7 +453,7 @@ export class GdmLiveAudio extends LitElement {
       this.mediaStream = null;
     }
 
-    this.updateStatus('Recording stopped. Click Start to begin again.');
+    this.updateStatus('Call Ended. Click Start to begin again.');
   }
 
   private startCallRecording() {
