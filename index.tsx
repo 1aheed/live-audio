@@ -228,7 +228,7 @@ export class GdmLiveAudio extends LitElement {
           responseModalities: [Modality.AUDIO],
           speechConfig: {
             voiceConfig: {prebuiltVoiceConfig: {voiceName: voiceName}},
-            languageCode: 'en-IN'
+            languageCode: 'ur-PK'
           },
           systemInstruction: {
             parts: [{
